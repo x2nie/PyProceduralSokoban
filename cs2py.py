@@ -70,7 +70,7 @@ class CSharpToPython(Translator):
         # for i in range(0, width):
         #     ....
         #                       for     (    int                   x                 =      0                 ;      x              <      width      ;      x                       ++) {
-        (r"(?P<blockIndent>[ ]*)for[ ]*\((?P<varType>[\S]+)[ ]*(?P<varName>\w+)[ ]*=[ ]*(?P<start>\d+)[ ]*;[ ]*(?P=varName)[ ]*\<[ ]*(?P<stop>[\S]+)[ ]*;[ ]*(?P=varName)[ ]*(?P<increment>[\+\-]+)[ ]*\){[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", 
+        (r"(?P<blockIndent>[ ]*)for[ ]*\((?P<varType>[\S]+)[ ]*(?P<varName>[\w]+)[ ]*=[ ]*(?P<start>[^ ;]+)[ ]*;[ ]*(?P=varName)[ ]*\<[ ]*(?P<stop>[^;]+)[ ]*;[ ]*(?P=varName)[ ]*(?P<increment>[\+\-]+)[ ]*\){[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", 
          r'\g<blockIndent>for \g<varName> in range(\g<start>, \g<stop>):\n\g<body>', None, 70),
 
         # (r"(?P<blockIndent>[ ]*)for[ ]*\((?P<varType>[\S]+)[ ]*(?P<varName>\w+)[ ]*=[ ]*(?P<start>[\d]+)[ ]*;[ ]*(?P=varName)[ ]*\<[ ]*(?P<stop>\w+)[ ]*;[ ]*(?P=varName)[ ]*(?P<increment>[\+\-]+)[ ]*", 
