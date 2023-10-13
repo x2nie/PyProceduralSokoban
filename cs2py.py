@@ -26,7 +26,7 @@ class CSharpToPython(Translator):
 
 
     RULES = [
-        (r"\)[ ]+\{", r"){", None, 0),  #? strip `) {`
+        (r"\)\s+\{", r"){", None, 0),  #? strip `) {`
         (r"[ ]+\)", r"(", None, 0),  #? strip ` )`
         (r"\([ ]+", r"(", None, 0),  #? strip `( `
         # true
