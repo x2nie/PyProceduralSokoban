@@ -1,4 +1,5 @@
 using System;
+import Cell
 
 public class Level {
     private int floorCell;

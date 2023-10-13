@@ -1,0 +1,1 @@
+Null, Wall, Floor, FloorFilled, Crate, Goal, Player = range(7)

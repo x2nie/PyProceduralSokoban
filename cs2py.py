@@ -207,6 +207,16 @@ class CSharpToPython(Translator):
         (r"(?P<float>\d+\.\d)f", 
          r"\1",None, 0),
 
+        #? new Cell[rows,cols]
+        #* [[0 for i in range(cols)] for j in range(rows)]
+        (r"new (?P<varName>[a-zA-Z0-9_]+)\[(?P<rows>[a-zA-Z0-9_]+),(?P<cols>[a-zA-Z0-9_]+)\]", 
+         r"[[0 for i\g<cols> in range(\g<cols>)] for j\g<rows> in range(\g<rows>)]",None, 0),
+
+        #? new ClassName()
+        #* ClassName()
+        (r"new (?P<ClassName>[a-zA-Z0-9_]+)\(", 
+         r"\g<ClassName>(",None, 0),
+
         # better view
         # b==a
         # b == a
