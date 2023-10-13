@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-# author: Ethosa
+# original author: Ethosa
+# modified by: x2nie
+
 from retranslator import Translator
 
 class CSharpToPython(Translator):
@@ -19,16 +21,20 @@ class CSharpToPython(Translator):
         self.rules = CSharpToPython.RULES[:]
         self.rules.extend(self.extra)
         self.rules.extend(CSharpToPython.LAST_RULES)
-        Translator.__init__(self, codeString, self.rules, useRegex)
+        # Translator.__init__(self, codeString, self.rules, useRegex)
+        super(CSharpToPython, self).__init__(codeString, self.rules, useRegex)
 
 
     RULES = [
+        (r"\)[ ]+\{", r"){", None, 0),  #? strip `) {`
+        (r"[ ]+\)", r"(", None, 0),  #? strip ` )`
+        (r"\([ ]+", r"(", None, 0),  #? strip `( `
         # true
         # True
-        (r"(?P<left>[\r\n]+(([^\"\r\n]*\"[^\"\r\n]+\"[^\"\r\n]*)+|[^\"\r\n]+))true", r"\g<left>True", None, 0),
+       (r"(?P<left>[\r\n]+(([^\"\r\n]*\"[^\"\r\n]+\"[^\"\r\n]*)+|[^\"\r\n]+))true", r"\g<left>True", None, 0),
         # false
         # False
-        (r"(?P<left>[\r\n]+(([^\"\r\n]*\"[^\"\r\n]+\"[^\"\r\n]*)+|[^\"\r\n]+))false", r"\g<left>False", None, 0),
+       (r"(?P<left>[\r\n]+(([^\"\r\n]*\"[^\"\r\n]+\"[^\"\r\n]*)+|[^\"\r\n]+))false", r"\g<left>False", None, 0),
         # this
         # self
         (r"(?P<left>[\r\n]+(([^\"\r\n]*\"[^\"\r\n]+\"[^\"\r\n]*)+|[^\"\r\n]+))this", r"\g<left>self", None, 0),
@@ -43,58 +49,66 @@ class CSharpToPython(Translator):
         (r"&&", r"and", None, 0),
         # !(...)
         # not (...)
-        (r"(?P<left>[\r\n]+(([^\"\r\n]*\"[^\"\r\n]+\"[^\"\r\n]*)+|[^\"\r\n]+))!\((?P<condition>[\S ]+)\)", r"\g<left>not (\g<condition>)", None, 0),
+        (r"(?P<left>[\r\n]+(([^\"\r\n]*\"[^\"\r\n]+\"[^\"\r\n]*)+|[^\"\r\n]+))!\((?P<condition>[\S ]+)\)", 
+         r"\g<left>not (\g<condition>)", None, 0),
         # // ...
         # # ...
         (r"//([^\r\n]+)", r"#\1",None, 0),
         # i++
         # i+=1
-        (r"\+\+", r"+=1",None, 0),
+        # (r"\+\+", r"+=1",None, 0),
         # i--
         # i-=1
-        (r"\-\-", r"-=1",None, 0),
-        # for (int i = 0; i < 5; i++){
+        # (r"\-\-", r"-=1",None, 0),
+
+        # for (int i = 0; i < 5; i+=2){
         #     ....
         # }
-        # for i in range(0, 5, 1):
+        # for i in range(0, 5, 2):
         #     ....
-        (r"(?P<blockIndent>[ ]*)for[ ]*\((?P<varType>[\S]+)[ ]*(?P<varName>[\S]+)[ ]*=[ ]*(?P<variable>[\S]+)[ ]*;[ ]*(?P=varName)[ ]*[\S]+[ ]*(?P<number>[\S ]+)[ ]*;[ ]*(?P=varName)[ ]*(\+=|\-=)[ ]*(?P<number2>[\S ]*)[ ]*\){[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", r'\g<blockIndent>for \g<varName> in range(\g<variable>, \g<number>, \g<number2>):\n\g<body>', None, 70),
-        # foreach (var i in array){
+        (r"(?P<blockIndent>[ ]*)for[ ]*\((?P<varType>[\S]+)[ ]*(?P<varName>[\w]+)[ ]*=[ ]*(?P<variable>[\S]+)[ ]*;[ ]*(?P=varName)[ ]*[\S]+[ ]*(?P<number>[\S ]+)[ ]*;[ ]*(?P=varName)[ ]*([\+\-]{1}=)[ ]*(?P<number2>[\S]+)[ ]*\)[ ]*{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", 
+         r'\g<blockIndent>for \g<varName> in range(\g<variable>, \g<number>, \g<number2>):\n\g<body>', None, 70),
+
+        #? for (int i = 0; i < width; i++){
+        #     ....
+        # }
+        # for i in range(0, width):
+        #     ....
+        #                       for     (    int                   x                 =      0                 ;      x              <      width      ;      x                       ++) {
+        (r"(?P<blockIndent>[ ]*)for[ ]*\((?P<varType>[\S]+)[ ]*(?P<varName>\w+)[ ]*=[ ]*(?P<start>\d+)[ ]*;[ ]*(?P=varName)[ ]*\<[ ]*(?P<stop>[\S]+)[ ]*;[ ]*(?P=varName)[ ]*(?P<increment>[\+\-]+)[ ]*\){[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", 
+         r'\g<blockIndent>for \g<varName> in range(\g<start>, \g<stop>):\n\g<body>', None, 70),
+
+        # (r"(?P<blockIndent>[ ]*)for[ ]*\((?P<varType>[\S]+)[ ]*(?P<varName>\w+)[ ]*=[ ]*(?P<start>[\d]+)[ ]*;[ ]*(?P=varName)[ ]*\<[ ]*(?P<stop>\w+)[ ]*;[ ]*(?P=varName)[ ]*(?P<increment>[\+\-]+)[ ]*", 
+        #  r'\g<blockIndent>for \g<varName> in range(\g<start>, \g<stop>):HALO\g<increment>UHUY\nCOY', None, 0),
+
+
+
+        #? foreach (var i in array){
         #     ....
         # }
         # for i in array:
         #     ....
         (r"(?P<blockIndent>[ ]*)foreach[ ]*\((?P<varType>[\S]+)[ ]*(?P<varName>[\S]+)[ ]*in[ ]*(?P<array>[\S]+)\){[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", r'\g<blockIndent>for \g<varName> in \g<array>:\n\g<body>', None, 70),
-        # ;\n
-        # \n
-        (r"(?P<indent>[ ]*)(?P<line>[\S \t]*);\n", r"\g<indent>\g<line>\n",None, 0),
-        # ;
-        # \n
-        (r"(?P<indent>[ ]*)(?P<line>[\S \t]*);[^\r\n]*;", r"\g<indent>\g<line>\n\g<indent>",None, 0),
-        # ;
-        # \n
-        (r"(?P<indent>[ ]*)(?P<line>[\S \t]*);[^\r\n]*#", r"\g<indent>\g<line> #",None, 0),
-        # int i = 0;
-        # i = 0;
-        (r"(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]]+)[ ]*(?P<varName>\w+)[ ]*=", r'\g<blockIndent>\g<varName> =',None, 0),
-        # int[] i = {1, 2, 3};
-        # i = [1, 2, 3];
-        (r"(?P<blockIndent>[ ]*)(?P<varName>[a-zA-Z0-9_]+)[ ]*=[ ]*{(?P<list>[\S ]+)}", r'\g<blockIndent>\g<varName> = [\g<list>]',None, 0),
         # /* ... */
         # """ ... """
         (r"/\*(?P<comment>[\S\s]+)\*/", r'"""\g<comment>"""',None, 0),
-        # else if (...){
+
+        #? else if (...){
         #     ....
         # }
         # elif ...:
         #     ....
-        (r"(?P<blockIndent>[ ]*)else if[ ]*\((?P<condition>[\S ]*)\){[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", r'\g<blockIndent>elif \g<condition>:\n\g<body>', None, 70),
-        # if (...){
+        (r"(?P<blockIndent>[ ]*)else if[ ]*\((?P<condition>[\S ]*)\){[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", 
+         r'\g<blockIndent>elif \g<condition>:\n\g<body>', None, 70),
+
+        #? if (...){
         #     ....
         # }
         # if ...:
         #     ....
-        (r"\n(?P<blockIndent>[ ]*)if[ ]*\((?P<condition>[\S ]*)\){[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", r'\n\g<blockIndent>if \g<condition>:\n\g<body>', None, 70),
+        (r"\n(?P<blockIndent>[ ]*)if[ ]*\((?P<condition>[^\)]*)\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}", 
+         r'\n\g<blockIndent>if \g<condition>:\n\g<body>', None, 70),
+
         # else{
         #     ....
         # }
@@ -106,25 +120,70 @@ class CSharpToPython(Translator):
         # }
         # while ...:
         #     ....
-        (r"(?P<blockIndent>[ ]*)while[ ]*\((?P<condition>[\S ]*)\){[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", r'\g<blockIndent>while \g<condition>:\n\g<body>', None, 70),
+        (r"(?P<blockIndent>[ ]*)while[ ]*\((?P<condition>[\S ]*)\){[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", 
+         r'\g<blockIndent>while \g<condition>:\n\g<body>', None, 70),
         # interface IInterface{
         #     ....
         # }
         # class IInterface:
         #     ....
         (r"(?P<blockIndent>[ ]*)interface[ ]*(?P<interfaceName>[a-zA-Z0-9_]+)[ ]*{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", r'\g<blockIndent>class \g<interfaceName>:\n\g<body>', None, 70),
+        (r"(?P<blockIndent>[ ]*)(?:public\s)?class[ ]*(?P<interfaceName>[a-zA-Z0-9_]+)[ ]*{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", 
+         r'\g<blockIndent>class \g<interfaceName>:\n\g<body>', None, 70),
+
+        #? interface method
         # void test();
         # def test():
         #     pass
-        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)", r'\g<start>\g<blockIndent>def \g<methodName>(\g<args>):\n\g<blockIndent>    pass', None, 0),
+        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)\;", 
+         r'\g<start>\g<blockIndent>def \g<methodName>(\g<args>):\n\g<blockIndent>    pass', None, 0),
+
+        #? public void method(){ }
+        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<severity>(public|private|protected)[ ]+)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)[ ]*\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
+         r'\g<start>\g<blockIndent>def \g<methodName>(\g<args>):\n\g<body>', None, 70),
+
+        #? public ClassName(){ }
+        # def __init__( )
+        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)public (?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
+         r'\g<start>\g<blockIndent>def __init__(\g<args>):\n\g<body>', None, 70),
+
+        #? property / instance var
+        (r"(?P<blockIndent>[ ]+)(?P<severity>(public|private|protected)[ ]+)(?P<returnType>[^\s]+)[ ]+(?P<methodName>\w+)[ ]*", 
+         r"\g<blockIndent>\g<methodName> = None", None, 0),
+
         # garbage delete
         (r"\n\n", r"\n", None, 0),
-        (r"(?P<blockIndent>[ ]*)(?P<blockName>[a-z]+)[ ]*\([ ]*(?P<other>[\S ]*)[ ]*\)[ ]*{[\s]*}", r"\g<blockIndent>\g<blockName> \g<other>:\n\g<blockIndent>    pass", None, 0),
+        (r"(?P<blockIndent>[ ]*)(?P<blockName>[a-z]+)[ ]*\([ ]*(?P<other>[\S ]*)[ ]*\){[\s]*}", 
+         r"\g<blockIndent>\g<blockName> \g<other>:\n\g<blockIndent>    pass", None, 0),
+
         # better view
         # b==a
         # b == a
         (r"(\S)(==|!=|<=|<|>|>=|=)(\S)", r"\1 \2 \3", None, 0),
-        #(r"not \(([\S ]+)(?!and|or)([\S ]+)\)", r"not \1\2", None, 0)
+        (r"not \(([\S ]+)(?!and|or)([\S ]+)\)", r"not \1\2", None, 0),
+
+        # ;\n
+        # \n
+       (r"(?P<indent>[ ]*)(?P<line>[\S \t]*);\n", r"\g<indent>\g<line>\n",None, 0),
+
+        # ;
+        # \n
+    #    (r"(?P<indent>[ ]*)(?P<line>[\S\t]*);[^\r\n]*;", 
+    #     r"\g<indent>\g<line>\n\g<indent>",None, 0),
+
+        # ;
+        # \n
+       (r"(?P<indent>[ ]*)(?P<line>[\S \t]*);[^\r\n]*#", r"\g<indent>\g<line> #",None, 0),
+ 
+        # int i = 0;
+        # i = 0;
+       (r"(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]]+)[ ]*(?P<varName>\w+)[ ]*=[^=]", 
+        r'\g<blockIndent>\g<varName> =',None, 0),
+
+        # int[] i = {1, 2, 3};
+        # i = [1, 2, 3];
+        (r"(?P<blockIndent>[ ]*)(?P<varName>[a-zA-Z0-9_]+)[ ]*=[ ]*{(?P<list>[\S ]+)}", r'\g<blockIndent>\g<varName> = [\g<list>]',None, 0),
+
     ]
 
     LAST_RULES = [

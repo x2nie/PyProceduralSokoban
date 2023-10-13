@@ -6,6 +6,7 @@ import math
 sourceText = """
 using System;
 
+//?halo moto
 if (0==1){
     int a = 0;
     bool d = true; int asd = 5; string asd1 = "hello world";
