@@ -29,6 +29,7 @@ class CSharpToPython(Translator):
         (r"\)\s+\{", r"){", None, 0),  #? strip `) {`
         (r"[ ]+\)", r"(", None, 0),  #? strip ` )`
         (r"\([ ]+", r"(", None, 0),  #? strip `( `
+        (r"\{[ ]+", r"{", None, 0),  #? strip `{ `
         # true
         # True
        (r"(?P<left>[\r\n]+(([^\"\r\n]*\"[^\"\r\n]+\"[^\"\r\n]*)+|[^\"\r\n]+))true", r"\g<left>True", None, 0),
@@ -113,7 +114,7 @@ class CSharpToPython(Translator):
         #? do {} while (...)
         # while ...:
         #     ....
-        (r"(?P<blockIndent>[ ]*)do[ ]*{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}[ ]*while[ ]*\((?P<condition>[\S ]*)\)", 
+        (r"(?P<blockIndent>[ ]*)do\s*{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}[ ]*while[ ]*\((?P<condition>[\S ]*)\)", 
          r'\g<blockIndent>while True:\n\g<body>\g<blockIndent>    if not \g<condition>:break', None, 70),
 
         #? while (...){
@@ -138,16 +139,20 @@ class CSharpToPython(Translator):
         # def test():
         #     pass
         (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)\;", 
-         r'\g<start>\g<blockIndent>def \g<methodName>(\g<args>):\n\g<blockIndent>    pass', None, 0),
+         r'\g<start>\g<blockIndent>def \g<methodName>(self, \g<args>):\n\g<blockIndent>    pass', None, 0),
 
         #? public void method(){ }
         (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<severity>(public|private|protected)[ ]+)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)[ ]*\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
-         r'\g<start>\g<blockIndent>def \g<methodName>(\g<args>):\n\g<body>', None, 70),
+         r'\g<start>\g<blockIndent>def \g<methodName>(self, \g<args>):\n\g<body>', None, 70),
 
         #? public ClassName(){ }
         # def __init__( )
         (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)public (?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
-         r'\g<start>\g<blockIndent>def __init__(\g<args>):\n\g<body>', None, 70),
+         r'\g<start>\g<blockIndent>def __init__(self, \g<args>):\n\g<body>', None, 70),
+
+        #? cleanup
+        (r", [\w]+ (?P<parameterName>[\w]+)", r", \g<parameterName>", None, 0),
+        (r"\(self, \):", r"(self):", None, 0),
 
         #? property / instance var
         (r"(?P<blockIndent>[ ]+)(?P<severity>(public|private|protected)[ ]+)(?P<returnType>[^\s]+)[ ]+(?P<methodName>[\w]+)[ ]*", 
@@ -155,6 +160,7 @@ class CSharpToPython(Translator):
 
         # garbage delete
         # (r"\n\n", r"\n", None, 0),
+        (r"\n\n\n", r"\n\n", None, 0),
         (r"(?P<blockIndent>[ ]*)(?P<blockName>[a-z]+)[ ]*\([ ]*(?P<other>[\S ]*)[ ]*\){[\s]*}", 
          r"\g<blockIndent>\g<blockName> \g<other>:\n\g<blockIndent>    pass", None, 0),
 

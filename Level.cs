@@ -1,4 +1,5 @@
 using System;
+
 public class Level {
     private int floorCell;
     private int width;
@@ -220,8 +221,12 @@ public class Level {
 
     private int floodFill(Cell target, Cell replace, int x, int y) {
         int filledFloor = 0;
-        if (target == replace) { return 0; }
-        else if (map[x,y] != target) { return 0; }
+        if (target == replace) { 
+            return 0; 
+        }
+        else if (map[x,y] != target) { 
+            return 0; 
+        }
         else { 
             map[x,y] = replace;
             filledFloor++;
