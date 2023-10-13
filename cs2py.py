@@ -186,7 +186,8 @@ class CSharpToPython(Translator):
 
         # int[] i = {1, 2, 3};
         # i = [1, 2, 3];
-        (r"(?P<blockIndent>[ ]*)(?P<varName>[a-zA-Z0-9_]+)[ ]*=[ ]*{(?P<list>[\S ]+)}", r'\g<blockIndent>\g<varName> = [\g<list>]',None, 0),
+        (r"(?P<blockIndent>[ ]*)(?P<varName>[a-zA-Z0-9_]+)[ ]*=[ ]*{(?P<list>[\S ]+)}",
+          r'\g<blockIndent>\g<varName> = [\g<list>]',None, 0),
 
         #? i++
         # i+=1
@@ -195,6 +196,16 @@ class CSharpToPython(Translator):
         #? i--
         # i-=1
         (r"\-\-", r"-=1",None, 0),
+
+        #? (int)abc
+        #* int(abc)
+        (r"\((?P<varType>[a-zA-Z0-9_]+)\)(?P<varName>[a-zA-Z0-9_]+)", 
+         r"\g<varType>(\g<varName>)",None, 0),
+
+        #? 98.789f
+        #* 98.789
+        (r"(?P<float>\d+\.\d)f", 
+         r"\1",None, 0),
 
         # better view
         # b==a
