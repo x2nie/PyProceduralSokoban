@@ -101,7 +101,8 @@ class CSharpToPython(Translator):
         # }
         # if ...:
         #     ....
-        (r"\n(?P<blockIndent>[ ]*)if[ ]*\((?P<condition>[^\)]*)\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}", 
+        (r"\n(?P<blockIndent>[ ]*)if[ ]*\((?P<condition>.+?(?=\)\{))\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}", 
+        # (r"\n(?P<blockIndent>[ ]*)if[ ]*\((?P<condition>[^\)]*)\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}", 
          r'\n\g<blockIndent>if \g<condition>:\n\g<body>', None, 70),
 
         #? else{
