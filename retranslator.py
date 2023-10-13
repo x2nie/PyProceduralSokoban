@@ -2,7 +2,7 @@
 # authors: Ethosa, Konard
 
 import re
-import regex
+# import regex
 
 class Translator:
     def __init__(self, codeString="", rules=[], useRegex=False):
@@ -15,10 +15,11 @@ class Translator:
         """
         self.codeString = codeString
         self.rules = rules
-        if useRegex:
-            self.r = regex
-        else:
-            self.r = re
+        # if useRegex:
+        #     self.r = regex
+        # else:
+        #     self.r = re
+        self.r = re
         self.Transform = self.compile = self.translate # callable objects
 
     def translate(self, src=None):
