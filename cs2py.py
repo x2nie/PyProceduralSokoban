@@ -54,14 +54,8 @@ class CSharpToPython(Translator):
         # // ...
         # # ...
         (r"//([^\r\n]+)", r"#\1",None, 0),
-        # i++
-        # i+=1
-        # (r"\+\+", r"+=1",None, 0),
-        # i--
-        # i-=1
-        # (r"\-\-", r"-=1",None, 0),
 
-        # for (int i = 0; i < 5; i+=2){
+        #? for (int i = 0; i < 5; i+=2){
         #     ....
         # }
         # for i in range(0, 5, 2):
@@ -109,20 +103,28 @@ class CSharpToPython(Translator):
         (r"\n(?P<blockIndent>[ ]*)if[ ]*\((?P<condition>[^\)]*)\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}", 
          r'\n\g<blockIndent>if \g<condition>:\n\g<body>', None, 70),
 
-        # else{
+        #? else{
         #     ....
         # }
         # else:
         #     ....
         (r"(?P<blockIndent>[ ]*)else[ ]*{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", r'\g<blockIndent>else:\n\g<body>', None, 70),
-        # while (...){
+
+        #? do {} while (...)
+        # while ...:
+        #     ....
+        (r"(?P<blockIndent>[ ]*)do[ ]*{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}[ ]*while[ ]*\((?P<condition>[\S ]*)\)", 
+         r'\g<blockIndent>while True:\n\g<body>\g<blockIndent>    if not \g<condition>:break', None, 70),
+
+        #? while (...){
         #     ....
         # }
         # while ...:
         #     ....
         (r"(?P<blockIndent>[ ]*)while[ ]*\((?P<condition>[\S ]*)\){[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", 
          r'\g<blockIndent>while \g<condition>:\n\g<body>', None, 70),
-        # interface IInterface{
+
+        #? interface IInterface{
         #     ....
         # }
         # class IInterface:
@@ -148,19 +150,14 @@ class CSharpToPython(Translator):
          r'\g<start>\g<blockIndent>def __init__(\g<args>):\n\g<body>', None, 70),
 
         #? property / instance var
-        (r"(?P<blockIndent>[ ]+)(?P<severity>(public|private|protected)[ ]+)(?P<returnType>[^\s]+)[ ]+(?P<methodName>\w+)[ ]*", 
+        (r"(?P<blockIndent>[ ]+)(?P<severity>(public|private|protected)[ ]+)(?P<returnType>[^\s]+)[ ]+(?P<methodName>[\w]+)[ ]*", 
          r"\g<blockIndent>\g<methodName> = None", None, 0),
 
         # garbage delete
-        (r"\n\n", r"\n", None, 0),
+        # (r"\n\n", r"\n", None, 0),
         (r"(?P<blockIndent>[ ]*)(?P<blockName>[a-z]+)[ ]*\([ ]*(?P<other>[\S ]*)[ ]*\){[\s]*}", 
          r"\g<blockIndent>\g<blockName> \g<other>:\n\g<blockIndent>    pass", None, 0),
 
-        # better view
-        # b==a
-        # b == a
-        (r"(\S)(==|!=|<=|<|>|>=|=)(\S)", r"\1 \2 \3", None, 0),
-        (r"not \(([\S ]+)(?!and|or)([\S ]+)\)", r"not \1\2", None, 0),
 
         # ;\n
         # \n
@@ -177,12 +174,27 @@ class CSharpToPython(Translator):
  
         # int i = 0;
         # i = 0;
-       (r"(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]]+)[ ]*(?P<varName>\w+)[ ]*=[^=]", 
+       (r"(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]]+)[ ]+(?P<varName>[\w]+)[ ]*=[^=]", 
         r'\g<blockIndent>\g<varName> =',None, 0),
 
         # int[] i = {1, 2, 3};
         # i = [1, 2, 3];
         (r"(?P<blockIndent>[ ]*)(?P<varName>[a-zA-Z0-9_]+)[ ]*=[ ]*{(?P<list>[\S ]+)}", r'\g<blockIndent>\g<varName> = [\g<list>]',None, 0),
+
+        #? i++
+        # i+=1
+        (r"\+\+", r"+=1",None, 0),
+
+        #? i--
+        # i-=1
+        (r"\-\-", r"-=1",None, 0),
+
+        # better view
+        # b==a
+        # b == a
+        # (r"(\S)(==|!=|<=|<|>|>=|=)(\S)", r"\1 \2 \3", None, 0),
+        # (r"(\S)[ ]*(==|!=|<=|<|>|>=|=)[ ]*(\S)", r"\1 \2 \3", None, 0),
+        (r"not \(([\S ]+)(?!and|or)([\S ]+)\)", r"not \1\2", None, 0),
 
     ]
 
