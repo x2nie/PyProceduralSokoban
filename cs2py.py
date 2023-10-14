@@ -2,6 +2,7 @@
 # original author: Ethosa
 # modified by: x2nie
 
+import re
 from retranslator import Translator
 
 class CSharpToPython(Translator):
@@ -24,6 +25,41 @@ class CSharpToPython(Translator):
         # Translator.__init__(self, codeString, self.rules, useRegex)
         super(CSharpToPython, self).__init__(codeString, self.rules, useRegex)
 
+    def translate(self, src=None):
+        if not src is None:
+            self.codeString = src
+        self.expliciteSelf()
+        ret = super(CSharpToPython, self).translate(src)
+
+        return ret
+
+    def expliciteSelf(self):
+        self.properties = []
+        self._resolveProperties()
+        self._resolveMethods()
+        pass
+        for p in self.properties:
+            print(p)
+
+    def _resolveProperties(self):
+        rule = r"(?P<blockIndent>[ ]+)(?P<severity>(public|private|protected)[ ]+)(?P<returnType>[^\s]+[ ]+)+(?P<methodName>[\w]+)[ ]*;"
+        matches = re.finditer(rule, self.codeString, re.MULTILINE)
+
+        for match in matches:
+            # self.properties.append(match.groupdict()['methodName'])
+            pat = match.groupdict()['methodName']
+            self.properties.append()
+            # for name, s in match.groupdict().items():
+            #     print(f"     Group {name} `{s}`")
+
+    def _resolveMethods(self):
+        rule = r"(?P<start>[\s]+)(?P<severity>(?:public |private |protected |published |override |overload )+)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)"
+        matches = re.finditer(rule, self.codeString, re.MULTILINE)
+
+        for match in matches:
+            self.properties.append(match.groupdict()['methodName'])
+            # for name, s in match.groupdict().items():
+            #     print(f"     Group {name} `{s}`")
 
     RULES = [
         (r"\)\s+\{", r"){", None, 0),  #? strip `) {`
@@ -175,17 +211,17 @@ class CSharpToPython(Translator):
          r'\g<start>\g<blockIndent>def \g<methodName>(self, \g<args>):\n\g<body>', None, 70),
 
         #? public ClassName(){ }
-        # def __init__( )
+        #* def __init__( )
         (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)public (?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
          r'\g<start>\g<blockIndent>def __init__(self, \g<args>):\n\g<body>', None, 70),
-
-        #? cleanup
-        (r", [\w]+ (?P<parameterName>[\w]+)", r", \g<parameterName>", None, 0),
-        (r"\(self, \):", r"(self):", None, 0),
 
         #? property / instance var
         (r"(?P<blockIndent>[ ]+)(?P<severity>(public|private|protected)[ ]+)(?P<returnType>[^\s]+)[ ]+(?P<methodName>[\w]+)[ ]*", 
          r"\g<blockIndent>\g<methodName> = None", None, 0),
+
+        #? cleanup
+        (r", [\w]+ (?P<parameterName>[\w]+)", r", \g<parameterName>", None, 0),
+        (r"\(self, \):", r"(self):", None, 0),
 
         # garbage delete
         # (r"\n\n", r"\n", None, 0),

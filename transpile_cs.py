@@ -9,7 +9,7 @@ with open('Level.cs', 'r') as f:
 # print('#'*50)
 translator = cs2py.CSharpToPython(useRegex=1)
 # print(translator.compile(sourceText))
-out = translator.compile(sourceText)
+out = translator.translate(sourceText)
 with open('output.py', 'w') as f:
     f.write(out)
 
