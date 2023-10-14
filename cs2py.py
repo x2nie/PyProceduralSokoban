@@ -29,35 +29,49 @@ class CSharpToPython(Translator):
         if not src is None:
             self.codeString = src
         self.expliciteSelf()
-        ret = super(CSharpToPython, self).translate(src)
+        self.codeString = self._resolveProperties(self.codeString)
+        ret = super(CSharpToPython, self).translate()
 
         return ret
 
     def expliciteSelf(self):
-        self.properties = []
-        self._resolveProperties()
-        self._resolveMethods()
+        self.properties = {}
+        self.methods = []
+        self._grepProperties()
+        self._grepMethods()
         pass
         for p in self.properties:
             print(p)
 
-    def _resolveProperties(self):
-        rule = r"(?P<blockIndent>[ ]+)(?P<severity>(public|private|protected)[ ]+)(?P<returnType>[^\s]+[ ]+)+(?P<methodName>[\w]+)[ ]*;"
+    def _grepProperties(self):
+        rule = r"(?P<blockIndent>[ ]+)(?P<severity>(public|private|protected)[ ]+)(?P<returnType>[^\s]+[ ]+)(?P<methodName>[\w]+)[ ]*;"
         matches = re.finditer(rule, self.codeString, re.MULTILINE)
 
         for match in matches:
             # self.properties.append(match.groupdict()['methodName'])
-            pat = match.groupdict()['methodName']
-            self.properties.append()
+            d = match.groupdict()
+            rep = r'self.%(methodName)s' % d #*dict
+            pat = r'\w*(?<!%(returnType)s)(?<!\.)%(methodName)s' % d #*dict
+            pat = pat.replace('[',r'\[').replace(']',r'\]')
+            self.properties[pat] = rep
+            # self.properties.append(pat)
             # for name, s in match.groupdict().items():
             #     print(f"     Group {name} `{s}`")
 
-    def _resolveMethods(self):
-        rule = r"(?P<start>[\s]+)(?P<severity>(?:public |private |protected |published |override |overload )+)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)"
+    def _resolveProperties(self, src):
+        for pat, rep in self.properties.items():
+            src = re.sub(pat, rep, src, 0, re.MULTILINE)
+        return src
+
+    def _grepMethods(self):
+        rule = r"(?P<start>[\s]+)(?P<severity>(?:public |private |protected |published |override |overload )+)(?P<returnType>\w+[ ]+)(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)"
         matches = re.finditer(rule, self.codeString, re.MULTILINE)
 
         for match in matches:
-            self.properties.append(match.groupdict()['methodName'])
+            # self.properties.append(match.groupdict()['methodName'])
+            pat = r'\w*(?<!%(returnType)s)%(methodName)s' % match.groupdict()
+            pat = pat.replace('[',r'\[').replace(']',r'\]')
+            self.methods.append(pat)
             # for name, s in match.groupdict().items():
             #     print(f"     Group {name} `{s}`")
 

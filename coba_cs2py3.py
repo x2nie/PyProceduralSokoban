@@ -59,7 +59,7 @@ public class PublicClass {
     public void Level(int crates = 2) {
         rand = new Random();
         cratesCount = crates;
-        width = rand.Next(2,4) * 3 + 2;
+        width = rand.Next(2,width) * 3 + 2;
         height = width;
     }
     public void generate() {
