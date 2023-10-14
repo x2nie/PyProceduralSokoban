@@ -72,6 +72,35 @@ public class PublicClass {
         }
         //Template generation
     }
+    public override string ToString()
+    {
+        string ret = "";
+        for(int x = 0; x < width; x++) {
+            for(int y = 0; y < height; y++) {
+                switch(map[x,y]) {
+                    case Cell.Floor:
+                        ret += " ";
+                        break;
+                    case Cell.Goal:
+                        ret += ".";
+                        break;
+                    case Cell.Wall:
+                        ret += "#";
+                        break;
+                    case Cell.Player:
+                        ret += "@";
+                        break;
+                    case Cell.Crate:
+                        ret += "$";
+                        break;
+                    default:
+                        break;
+                }
+            }
+            ret += "\\n";
+        }
+        return ret;
+    }
     for (int y = 1; y < height-1; y++){
         a++7
     }

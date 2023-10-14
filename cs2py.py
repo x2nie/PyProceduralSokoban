@@ -112,6 +112,34 @@ class CSharpToPython(Translator):
         #     ....
         (r"(?P<blockIndent>[ ]*)else[ ]*{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", r'\g<blockIndent>else:\n\g<body>', None, 70),
 
+
+
+        #? switch (map[x,y]) { 
+        # match map[x,y]
+        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)switch[ ]*\((?P<args>[^\)]*)\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
+         r'\g<start>\g<blockIndent>match \g<args>:\n\g<body>', None, 70),
+
+        #?     break;
+        #? case Foo.Bar:
+        #* case Foo.Bar:
+        (r"(?P<start>[\r\n]+)(?P<break>[ ]+break[ ]*;[\r\n]+)(?P<blockIndent>[ ]*)case[ ]+(?P<args>[^:]*):",  
+         r'\g<start>\g<blockIndent>case \g<args>:', None, 0),
+
+        #?     break;
+        #? default:
+        #* case _:
+        (r"(?P<start>[\r\n]+)(?P<break>[ ]+break[ ]*;[\r\n]+)(?P<blockIndent>[ ]*)default[ ]*:",  
+         r'\g<start>\g<blockIndent>case _:', None, 0),
+
+
+        #? case _:
+        #?     break;
+        #* 
+        (r"(?P<start>[\r\n]+)(?P<break>[ ]*case _:[\r\n]+)(?P<blockIndent>[ ]*)break[ ]*;",  
+         r'\g<start>', None, 0),
+
+
+
         #? do {} while (...)
         # while ...:
         #     ....
@@ -143,7 +171,7 @@ class CSharpToPython(Translator):
          r'\g<start>\g<blockIndent>def \g<methodName>(self, \g<args>):\n\g<blockIndent>    pass', None, 0),
 
         #? public void method(){ }
-        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<severity>(public|private|protected)[ ]+)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)[ ]*\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
+        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<severity>(?:public |private |protected |published |override |overload )+)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)[ ]*\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
          r'\g<start>\g<blockIndent>def \g<methodName>(self, \g<args>):\n\g<body>', None, 70),
 
         #? public ClassName(){ }
@@ -211,6 +239,7 @@ class CSharpToPython(Translator):
         #* [[0 for i in range(cols)] for j in range(rows)]
         (r"new (?P<varName>[a-zA-Z0-9_]+)\[(?P<rows>[a-zA-Z0-9_]+),(?P<cols>[a-zA-Z0-9_]+)\]", 
          r"[[0 for i\g<cols> in range(\g<cols>)] for j\g<rows> in range(\g<rows>)]",None, 0),
+        #  r"[[0 for i\g<cols> in range(\g<cols>)] for j\g<rows> in range(\g<rows>)]",None, 0),
 
         #? new ClassName()
         #* ClassName()
