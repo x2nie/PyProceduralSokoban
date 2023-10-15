@@ -383,7 +383,7 @@ class CSharpToPython(Translator):
         (r"Array\.Copy\(", r"ArrayCopy(", None, 0),
 
         (r"Console\.WriteLine\(", r"print(", None, 0),
-        (r"Console\.Write\((?P<args>[^\)]+)\)", r"sys.stdout.write(\g<args>)", None, 0),
+        (r"Console\.Write\((?P<args>[^\)]+)\)", r"print(\g<args>, end='')", None, 0),
         (r"using[ ]+\w+", r"", None, 0),
         (r"\A", r"import random\nimport math\nimport sys\nfrom utils import *", None, 0),
         (r"([a-zA-Z0-9_]+)\.contains\(([\S ]+)\)", r"\2 in \1", None, 0),

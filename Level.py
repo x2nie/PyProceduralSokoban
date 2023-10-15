@@ -314,15 +314,15 @@ class Level:
             for y in range(0, self.height):
                 match self.map[x,y]:
                     case Cell.Floor:
-                        sys.stdout.write(" ")
+                        print(" ", end='')
                     case Cell.Wall:
-                        sys.stdout.write("#")
+                        print("#", end='')
                     case Cell.Crate:
-                        sys.stdout.write("$")
+                        print("$", end='')
                     case Cell.Goal:
-                        sys.stdout.write(".")
+                        print(".", end='')
                     case Cell.Player:
-                        sys.stdout.write("@")
+                        print("@", end='')
 
             print()
 
