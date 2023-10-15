@@ -1,6 +1,3 @@
-import random
-import math
-import sys
 from utils import *
 
 class Template:

@@ -34,11 +34,15 @@ class CSharpToPython(Translator):
         ret = super(CSharpToPython, self).translate()
         ret = super(CSharpToPython, self).translate()
         ret = self.splitMultipleAssignments(ret)
+
+        self._grepStatics(ret)
+        ret = self._resolveStatics(ret)
         return ret
 
     def expliciteSelf(self):
         self.properties = {}
         self.methods = {}
+        self.statics = {}
         self._grepProperties()
         self._grepMethods()
         pass
@@ -56,14 +60,12 @@ class CSharpToPython(Translator):
             pat = r'\w*(?<!%(returnType)s)(?<!\.)%(methodName)s' % d #*dict
             pat = pat.replace('[',r'\[').replace(']',r'\]')
             self.properties[pat] = rep
-            # self.properties.append(pat)
-            # for name, s in match.groupdict().items():
-            #     print(f"     Group {name} `{s}`")
 
     def _resolveProperties(self, src):
         for pat, rep in self.properties.items():
             src = re.sub(pat, rep, src, 0, re.MULTILINE)
         return src
+
 
     def _grepMethods(self):
         rule = r"(?P<start>[\s]+)(?P<severity>(?:public |private |protected |published |override |overload )+)(?P<returnType>\w+[ ]+)(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)"
@@ -114,6 +116,24 @@ class CSharpToPython(Translator):
             replaceCount += 1
             src = self.r.sub(pat, rep, src, 1)
         return src
+
+    def _grepStatics(self, src):
+        rule = r"(?P<blockIndent>[ ]+)(?P<classmethod>\@classmethod)[\n\r]+(?P=blockIndent)def (?P<methodName>[\w]+)\("
+        matches = re.finditer(rule, src, re.MULTILINE)
+
+        for match in matches:
+            # self.properties.append(match.groupdict()['methodName'])
+            d = match.groupdict()
+            rep = r'cls.%(methodName)s' % d #*dict
+            pat = r'\w*(?<!def )(?<!\.)%(methodName)s' % d #*dict
+            # pat = pat.replace('[',r'\[').replace(']',r'\]')
+            self.statics[pat] = rep
+
+    def _resolveStatics(self, src):
+        for pat, rep in self.statics.items():
+            src = re.sub(pat, rep, src, 0, re.MULTILINE)
+        return src
+
 
 
     RULES = [
@@ -289,8 +309,8 @@ class CSharpToPython(Translator):
 
         #? new Cell [] {Cell.Null, ..},
         #* new Cell [] {Cell.Null, ..},
-        (r"(?P<blockIndent>[ ]+)new (?P<returnType>[^\{]+)\{(?P<valueArray>[^\}]+)\}", 
-         r"\g<blockIndent>[\g<valueArray>]", None, 0),
+        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]+)new (?P<returnType>[^\{]+)\{(?P<valueArray>[^\}]+)\}", 
+         r"\g<start>\g<blockIndent>[\g<valueArray>]", None, 0),
 
 
 

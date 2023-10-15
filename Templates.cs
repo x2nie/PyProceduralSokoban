@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Template;
 import Cell
+from template import Template
 
 public static class Templates {
     private static Cell[][] template1 = new Cell[][] {
@@ -11,6 +12,7 @@ public static class Templates {
         new Cell [] {Cell.Null, Cell.Floor, Cell.Floor, Cell.Floor, Cell.Null},
         new Cell [] {Cell.Null, Cell.Null, Cell.Null, Cell.Null, Cell.Null},
     };
+    
     private static Cell[][] template2 = new Cell[][] {
         new Cell [] {Cell.Null, Cell.Null, Cell.Null, Cell.Null, Cell.Null},
         new Cell [] {Cell.Null, Cell.Wall, Cell.Floor, Cell.Floor, Cell.Null},
@@ -161,7 +163,7 @@ public static class Templates {
 
     public static Template getRandom() {
       Random r = new Random();
-      Cell[][] randTemplate = templates[r.Next(templates.Count)];
+      Cell[][] randTemplate = templates[r.Next(templates.Length)];
       return new Template(randTemplate);
     }
 }
