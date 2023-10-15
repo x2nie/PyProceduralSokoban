@@ -271,16 +271,21 @@ class CSharpToPython(Translator):
         (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)\;", 
          r'\g<start>\g<blockIndent>def \g<methodName>(self, \g<args>):\n\g<blockIndent>    pass', None, 0),
 
-        #? public void method(){ }
-        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<severity>(?:public |private |protected |published |override |overload |static )+)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)[ ]*\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
-         r'\g<start>\g<blockIndent>def \g<methodName>(self, \g<args>):\n\g<body>', None, 70),
 
 
         #? private static Cell[][] template1 = new Cell[][]{ }
-        #*  @staticmethod
+        #*  @classmethod
         #*  def template1():
-        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<severity>(?:public |private |protected |published |override |overload )+)static (?P<returnType>[\w]+[\w\<\>\[\]]+)[ ]+(?P<methodName>\w+)[ ]*(?P<args>[^{]*)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
-         r'\g<start>\g<blockIndent>@staticmethod\n\g<blockIndent>def \g<methodName>():\n\g<blockIndent>    return [\n\g<body>\n\g<blockIndent>    ]', None, 70),
+        #*      return [
+        #*  ] 
+        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<severity>(?:public |private |protected |published |override |overload )+)static (?P<returnType>[\w]+[\w\<\>\[\]]+)[ ]+(?P<methodName>\w+)[ ]*=(?P<args>[^\{]*)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
+         r'\g<start>\g<blockIndent>@classmethod\n\g<blockIndent>def \g<methodName>(cls):\n\g<blockIndent>    return [\n\g<body>\n\g<blockIndent>    ]', None, 70),
+
+        #? public static Template getRandom() {
+        #*  @classmethod
+        #*  def getRandom():
+        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<severity>(?:public |private |protected |published |override |overload )+)static (?P<returnType>[\w]+[\w\<\>\[\]]+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[^\)]*)\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
+         r'\g<start>\g<blockIndent>@classmethod\n\g<blockIndent>def \g<methodName>(cls, \g<args>):\n\g<body>', None, 70),
 
         #? new Cell [] {Cell.Null, ..},
         #* new Cell [] {Cell.Null, ..},
@@ -288,6 +293,11 @@ class CSharpToPython(Translator):
          r"\g<blockIndent>[\g<valueArray>]", None, 0),
 
 
+
+
+        #? public void method(){ }
+        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<severity>(?:public |private |protected |published |override |overload )+)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)[ ]*\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
+         r'\g<start>\g<blockIndent>def \g<methodName>(self, \g<args>):\n\g<body>', None, 70),
 
         #? public ClassName(){ }
         #* def __init__( )
@@ -394,6 +404,7 @@ class CSharpToPython(Translator):
 
     LAST_RULES = [
         # python methods:
+        (r",[ ]*\):", r"):", None, 0),
         (r"Array\.Copy\(", r"ArrayCopy(", None, 0),
 
         (r"Console\.WriteLine\(", r"print(", None, 0),
