@@ -1,4 +1,5 @@
 using System;
+
 public class Template {
     private Cell[][] template;
 
@@ -12,7 +13,9 @@ public class Template {
         }
     }
 
-    public Cell GetCell(int x, int y) { return template[x][y]; }
+    public Cell GetCell(int x, int y) { 
+        return template[x][y]; 
+    }
 
     public void randomRotation() {
         Random r = new Random();
@@ -41,7 +44,7 @@ public class Template {
 
         // Reverse each row
         for(int y = 0; y < heigth; y++) {
-            for(int x = 0; x < width/ 2; x++) {
+            for(int x = 0; x < width/2; x++) {
                 Cell tmpCell = template[y][x];
                 template[y][x] = template[y][width-1-x];
                 template[y][width-1-x] = tmpCell;

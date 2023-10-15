@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+
 public static class Templates {
     private static Cell[][] template1 = new Cell[][] {
         new Cell [] {Cell.Null, Cell.Null, Cell.Null, Cell.Null, Cell.Null},
