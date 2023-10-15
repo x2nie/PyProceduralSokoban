@@ -30,13 +30,14 @@ class CSharpToPython(Translator):
             self.codeString = src
         self.expliciteSelf()
         self.codeString = self._resolveProperties(self.codeString)
+        self.codeString = self._resolveMethods(self.codeString)
         ret = super(CSharpToPython, self).translate()
 
         return ret
 
     def expliciteSelf(self):
         self.properties = {}
-        self.methods = []
+        self.methods = {}
         self._grepProperties()
         self._grepMethods()
         pass
@@ -69,17 +70,27 @@ class CSharpToPython(Translator):
 
         for match in matches:
             # self.properties.append(match.groupdict()['methodName'])
-            pat = r'\w*(?<!%(returnType)s)%(methodName)s' % match.groupdict()
+            d = match.groupdict()
+            rep = r'self.%(methodName)s' % d #*dict
+            pat = r'\w*(?<!%(returnType)s)(?<!\.)%(methodName)s' % d
             pat = pat.replace('[',r'\[').replace(']',r'\]')
-            self.methods.append(pat)
+            self.methods[pat] = rep
             # for name, s in match.groupdict().items():
             #     print(f"     Group {name} `{s}`")
 
+    def _resolveMethods(self, src):
+        for pat, rep in self.methods.items():
+            src = re.sub(pat, rep, src, 0, re.MULTILINE)
+        return src
+
+
     RULES = [
         (r"\)\s+\{", r"){", None, 0),  #? strip `) {`
+        (r"\)[ ]+\{", r"){", None, 0),  #? strip `) {`
         (r"[ ]+\)", r"(", None, 0),  #? strip ` )`
         (r"\([ ]+", r"(", None, 0),  #? strip `( `
         (r"\{[ ]+", r"{", None, 0),  #? strip `{ `
+        (r"\}[ ]+", r"}", None, 0),  #? strip `{ `
         # true
         # True
        (r"(?P<left>[\r\n]+(([^\"\r\n]*\"[^\"\r\n]+\"[^\"\r\n]*)+|[^\"\r\n]+))true", r"\g<left>True", None, 0),
@@ -151,9 +162,9 @@ class CSharpToPython(Translator):
         # }
         # if ...:
         #     ....
-        (r"\n(?P<blockIndent>[ ]*)if[ ]*\((?P<condition>.+?(?=\)\{))\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}", 
+        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)if[ ]*\((?P<condition>.+?(?=\)\{))\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}", 
         # (r"\n(?P<blockIndent>[ ]*)if[ ]*\((?P<condition>[^\)]*)\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}", 
-         r'\n\g<blockIndent>if \g<condition>:\n\g<body>', None, 70),
+         r'\g<start>\g<blockIndent>if \g<condition>:\n\g<body>', None, 70),
 
         #? else{
         #     ....
@@ -186,7 +197,7 @@ class CSharpToPython(Translator):
         #?     break;
         #* 
         (r"(?P<start>[\r\n]+)(?P<break>[ ]*case _:[\r\n]+)(?P<blockIndent>[ ]*)break[ ]*;",  
-         r'\g<start>', None, 0),
+         r'', None, 0),
 
 
 
