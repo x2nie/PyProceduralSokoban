@@ -3,7 +3,9 @@ import cs2py
 import re
 import math
 
-with open('Level.cs', 'r') as f:
+src = 'Level.cs'
+# src = 'Template.cs'
+with open(src, 'r') as f:
     sourceText = f.read()
 # print(sourceText)
 # print('#'*50)

@@ -32,7 +32,8 @@ class CSharpToPython(Translator):
         self.codeString = self._resolveProperties(self.codeString)
         self.codeString = self._resolveMethods(self.codeString)
         ret = super(CSharpToPython, self).translate()
-
+        ret = super(CSharpToPython, self).translate()
+        ret = self.splitMultipleAssignments(ret)
         return ret
 
     def expliciteSelf(self):
@@ -81,6 +82,36 @@ class CSharpToPython(Translator):
     def _resolveMethods(self, src):
         for pat, rep in self.methods.items():
             src = re.sub(pat, rep, src, 0, re.MULTILINE)
+        return src
+
+    def splitMultipleAssignments(self, src):
+        # return src
+        pat = r"(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]\.]+)[ ]+(?P<varName1>[^, ]+)(?P<varNames>(?:,[ ]*[\w]+)+)[ ]*=[ ]+(?P<right>[\w]+)"
+        def rep(match):
+            d = match.groupdict()
+            indent = d['blockIndent']
+            value = d['right']
+            lines = []
+            # varNames = d['varNames'].split(',')
+            varNames = d['varName1'] + d['varNames']
+            varNames = varNames.split(',')
+            print('varNames:', varNames)
+            # varNames = [d['varName1']] + varNames
+            for varName in varNames:
+                varName = varName.strip()
+                lines.append(f"{indent}{varName} = {value}")
+
+            print('\n'.join(lines))
+            return '\n'.join(lines)
+        
+        # src = re.sub(pat, rep, src, 10, re.MULTILINE)
+        replaceCount = 0
+        src = self.r.sub(pat, rep, src, 1)
+        while self.r.search(pat, src):
+            if replaceCount+1 > 70:
+                break
+            replaceCount += 1
+            src = self.r.sub(pat, rep, src, 1)
         return src
 
 
