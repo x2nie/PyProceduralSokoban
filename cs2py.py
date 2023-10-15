@@ -86,22 +86,23 @@ class CSharpToPython(Translator):
 
     def splitMultipleAssignments(self, src):
         # return src
-        pat = r"(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]\.]+)[ ]+(?P<varName1>[^, ]+)(?P<varNames>(?:,[ ]*[\w]+)+)[ ]*=[ ]+(?P<right>[\w]+)"
+        pat = r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]\.]+)[ ]+(?P<varName1>[^, \(]+)(?P<varNames>(?:,[ ]*[\w]+)+)[ ]*=[ ]+(?P<right>[\w]+)"
         def rep(match):
             d = match.groupdict()
+            start = d['start']
             indent = d['blockIndent']
             value = d['right']
             lines = []
             # varNames = d['varNames'].split(',')
             varNames = d['varName1'] + d['varNames']
             varNames = varNames.split(',')
-            print('varNames:', varNames)
+            # print('varNames:', varNames)
             # varNames = [d['varName1']] + varNames
             for varName in varNames:
                 varName = varName.strip()
-                lines.append(f"{indent}{varName} = {value}")
+                lines.append(f"{start}{indent}{varName} = {value}")
 
-            print('\n'.join(lines))
+            # print('\n'.join(lines))
             return '\n'.join(lines)
         
         # src = re.sub(pat, rep, src, 10, re.MULTILINE)
@@ -309,7 +310,7 @@ class CSharpToPython(Translator):
  
         #? int i = 0;
         # i = 0;
-       (r"(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]\.]+)[ ]+(?P<varName>[\w\.]+)[ ]*=[ ]+(?P<right>[\w]+)", 
+       (r"(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]\.]+)[ ]+(?P<varName>[\w\.]+)[ ]*=[ ]+(?P<right>[\w\'\"]+)", 
         r'\g<blockIndent>\g<varName> = \g<right>',None, 0),
 
         # int[] i = {1, 2, 3};
@@ -319,11 +320,11 @@ class CSharpToPython(Translator):
 
         #? i++
         # i+=1
-        (r"\+\+", r"+=1",None, 0),
+        (r"\+\+", r" += 1",None, 0),
 
         #? i--
         # i-=1
-        (r"\-\-", r"-=1",None, 0),
+        (r"\-\-", r" -= 1",None, 0),
 
         #? (int)abc
         #* int(abc)
