@@ -359,7 +359,7 @@ class CSharpToPython(Translator):
 
         #? (int)abc
         #* int(abc)
-        (r"\((?P<varType>[a-zA-Z0-9_]+)\)(?P<varName>[a-zA-Z0-9_]+)", 
+        (r"\((?P<varType>[a-zA-Z0-9_]+)\)(?P<varName>[a-zA-Z0-9_\.]+)", 
          r"\g<varType>(\g<varName>)",None, 0),
 
         #? 98.789f
@@ -374,9 +374,15 @@ class CSharpToPython(Translator):
 
 
 
+        #? new Cell[rows,cols]
+        #* [[0 for i in range(cols)] for j in range(rows)]
+        (r"new (?P<varName>[a-zA-Z0-9_]+)\[(?P<rows>[a-zA-Z0-9_\.]+),(?P<cols>[a-zA-Z0-9_\.]+)\]", 
+         r"[[0 for k in range(\g<cols>)] for j in range(\g<rows>)]",None, 0),
+        #  r"[[0 for i\g<cols> in range(\g<cols>)] for j\g<rows> in range(\g<rows>)]",None, 0),
+
         #? new Cell[rows.length][]
         #* [[] for j in range(rows)]
-        (r"new (?P<varName>[a-zA-Z0-9_]+)\[(?P<rows>[^\]]+)\]\[\]", 
+        (r"new (?P<varName>[a-zA-Z0-9_]+)\[(?P<rows>[^\,]]+)\]\[\]", 
          r"[[] for j in range(\g<rows>)]",None, 0),
 
         #? new Cell[content[x].Length];
@@ -384,12 +390,6 @@ class CSharpToPython(Translator):
         #? ((?P<condition>.+?(?=\)\{))\)\{[\r\n]+(?P<body>(?P<ind
         (r"new (?P<varName>[a-zA-Z0-9_]+)\[(?P<rows>.+?(?=\];))\];", 
          r"[None for j in range(\g<rows>)]",None, 0),
-
-        #? new Cell[rows,cols]
-        #* [[0 for i in range(cols)] for j in range(rows)]
-        (r"new (?P<varName>[a-zA-Z0-9_]+)\[(?P<rows>[a-zA-Z0-9_]+),(?P<cols>[a-zA-Z0-9_]+)\]", 
-         r"[[0 for i\g<cols> in range(\g<cols>)] for j\g<rows> in range(\g<rows>)]",None, 0),
-        #  r"[[0 for i\g<cols> in range(\g<cols>)] for j\g<rows> in range(\g<rows>)]",None, 0),
 
         #? new ClassName()
         #* ClassName()
@@ -415,6 +415,16 @@ class CSharpToPython(Translator):
         # ;
         # \n
        (r"(?P<indent>[ ]*)(?P<line>[\S \t]*);[^\r\n]*#", r"\g<indent>\g<line> #",None, 0),
+
+        #? map[x,0] = -->   map[x][0] =
+        #? self.map[y,self.width-1] -->  self.map[y][self.width-1]
+        # \n
+    #    (r"(?P<var>[\w\.]+)\[(?P<one>[^,]+),(?P<two>[^\]]+)\][ ]*=", 
+    #     r"\g<var>[\g<one>][\g<two>] =",None, 0),
+
+    #    (r"(?P<space>[ ]+)\[(?P<one>[\w\.\-]+),(?P<two>[^\]]+)\](?P<right>[^,]+)", 
+       (r"(?P<space>[ \(]+)(?P<var>[\w\.]+)\[(?P<one>[^,]+),(?P<two>[^\]]+)\]", 
+        r"\g<space>\g<var>[\g<one>][\g<two>]",None, 0),
  
         # a.length
         # len(a)

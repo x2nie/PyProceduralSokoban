@@ -9,5 +9,7 @@ def ArrayCopy(src, dst, count):
 
 
 class Random():
-    def Next(self, n):
-        return random.randint(n)
+    def Next(self, a, b=None):
+        if b is None:
+            return random.randrange(a)
+        return random.randrange(a, b)

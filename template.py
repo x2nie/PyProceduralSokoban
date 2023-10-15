@@ -39,7 +39,7 @@ class Template:
 
         # Reverse each row
         for y in range(0, heigth):
-            for x in range(0, width/2):
+            for x in range(0, int(width/2)):
                 tmpCell = self.template[y][x]
                 self.template[y][x] = self.template[y][width-1-x]
                 self.template[y][width-1-x] = tmpCell

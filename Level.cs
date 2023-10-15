@@ -1,5 +1,7 @@
 using System;
 import Cell
+from templates import Templates
+
 
 public class Level {
     private int floorCell;

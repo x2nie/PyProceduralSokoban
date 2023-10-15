@@ -217,6 +217,6 @@ class Templates:
     @classmethod
     def getRandom(cls):
       r = Random()
-      randTemplate = cls.templates[r.Next(len(cls.templates))]
+      randTemplate = cls.templates()[r.Next(len(cls.templates()))]()
       return Template(randTemplate)
 

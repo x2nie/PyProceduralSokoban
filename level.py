@@ -1,8 +1,6 @@
-import random
-import math
-import sys
 from utils import *
 import Cell
+from templates import Templates
 
 class Level:
     floorCell = None
@@ -19,17 +17,17 @@ class Level:
         self.height = self.width
 
     def generate(self):
-        self.map = [None for j in range(self.width,self.height)]
+        self.map = [[0 for k in range(self.height)] for j in range(self.width)]
         self.floorCell = 0
 
         #Wall generation around level
         for x in range(0, self.width):
-            self.map[0,x] = Cell.Wall
-            self.map[self.height-1,x] = Cell.Wall
+            self.map[0][x] = Cell.Wall
+            self.map[self.height-1][x] = Cell.Wall
 
         for y in range(1, self.height-1):
-            self.map[y,0] = Cell.Wall
-            self.map[y,self.width-1] = Cell.Wall
+            self.map[y][0] = Cell.Wall
+            self.map[y][self.width-1] = Cell.Wall
 
         
         #Template generation
@@ -67,10 +65,10 @@ class Level:
                 y = self.rand.Next(2, self.height-2)
 
                 surroundWall = 0
-                surroundWall += 1 if self.map[x-1,y] == Cell.Wall else 0
-                surroundWall += 1 if self.map[x+1,y] == Cell.Wall else 0
-                surroundWall += 1 if self.map[x,y-1] == Cell.Wall else 0
-                surroundWall += 1 if self.map[x,y+1] == Cell.Wall else 0
+                surroundWall += 1 if self.map[x-1][y] == Cell.Wall else 0
+                surroundWall += 1 if self.map[x+1][y] == Cell.Wall else 0
+                surroundWall += 1 if self.map[x][y-1] == Cell.Wall else 0
+                surroundWall += 1 if self.map[x][y+1] == Cell.Wall else 0
 
                 if attempt >= self.floorCell:
                     print("Can't self.generate crates ! Max attempt reach")
@@ -78,10 +76,10 @@ class Level:
 
                 attempt += 1
 
-                if not (self.map[x,y] != Cell.Floor or surroundWall >= 2):
+                if not (self.map[x][y] != Cell.Floor or surroundWall >= 2):
                     break
 
-            self.map[x,y] = Cell.Crate
+            self.map[x][y] = Cell.Crate
 
         return True
 
@@ -101,10 +99,10 @@ class Level:
 
             attempt += 1
 
-            if not (self.map[x,y] != Cell.Floor):
+            if not (self.map[x][y] != Cell.Floor):
                 break
 
-        self.map[x,y] = Cell.Player
+        self.map[x][y] = Cell.Player
         return True
 
     def spawnGoals(self, n):
@@ -119,16 +117,16 @@ class Level:
                 x = self.rand.Next(1, self.width-1)
                 y = self.rand.Next(1, self.height-1)
 
-                if self.map[x, y+1] == Cell.Floor and self.map[x, y+2] == Cell.Floor:
+                if self.map[x][ y+1] == Cell.Floor and self.map[x][ y+2] == Cell.Floor:
                     isValidGoal = True
 
-                elif self.map[x, y-1] == Cell.Floor and self.map[x, y-2] == Cell.Floor:
+                elif self.map[x][ y-1] == Cell.Floor and self.map[x][ y-2] == Cell.Floor:
                     isValidGoal = True
 
-                elif self.map[x+1, y] == Cell.Floor and self.map[x+2, y] == Cell.Floor:
+                elif self.map[x+1][ y] == Cell.Floor and self.map[x+2][ y] == Cell.Floor:
                     isValidGoal = True
 
-                elif self.map[x-1, y] == Cell.Floor and self.map[x-2, y] == Cell.Floor:
+                elif self.map[x-1][ y] == Cell.Floor and self.map[x-2][ y] == Cell.Floor:
                     isValidGoal = True
 
                 if attempt >= self.floorCell:
@@ -137,10 +135,10 @@ class Level:
 
                 attempt += 1
 
-                if not (self.map[x,y] != Cell.Floor or isValidGoal == False):
+                if not (self.map[x][y] != Cell.Floor or isValidGoal == False):
                     break
 
-            self.map[x,y] = Cell.Goal
+            self.map[x][y] = Cell.Goal
 
         return True
 
@@ -161,20 +159,20 @@ class Level:
     def cleanAloneWall(self):
         for x in range(1, self.width-1):
             for y in range(1, self.height-1):
-                if self.map[x,y] == Cell.Wall:
+                if self.map[x][y] == Cell.Wall:
                     surroundFloor = 0
-                    surroundFloor += 1 if self.map[x-1,y] == Cell.Floor else 0
-                    surroundFloor += 1 if self.map[x+1,y] == Cell.Floor else 0
-                    surroundFloor += 1 if self.map[x,y-1] == Cell.Floor else 0
-                    surroundFloor += 1 if self.map[x,y+1] == Cell.Floor else 0
-                    surroundFloor += 1 if self.map[x-1,y-1] == Cell.Floor else 0
-                    surroundFloor += 1 if self.map[x+1,y-1] == Cell.Floor else 0
-                    surroundFloor += 1 if self.map[x+1,y+1] == Cell.Floor else 0
-                    surroundFloor += 1 if self.map[x+1,y-1] == Cell.Floor else 0
+                    surroundFloor += 1 if self.map[x-1][y] == Cell.Floor else 0
+                    surroundFloor += 1 if self.map[x+1][y] == Cell.Floor else 0
+                    surroundFloor += 1 if self.map[x][y-1] == Cell.Floor else 0
+                    surroundFloor += 1 if self.map[x][y+1] == Cell.Floor else 0
+                    surroundFloor += 1 if self.map[x-1][y-1] == Cell.Floor else 0
+                    surroundFloor += 1 if self.map[x+1][y-1] == Cell.Floor else 0
+                    surroundFloor += 1 if self.map[x+1][y+1] == Cell.Floor else 0
+                    surroundFloor += 1 if self.map[x+1][y-1] == Cell.Floor else 0
 
                     if surroundFloor > 6:
                         if self.rand.Next(0,100) < 30:
-                            self.map[x,y] = Cell.Floor
+                            self.map[x][y] = Cell.Floor
 
 
 
@@ -188,7 +186,7 @@ class Level:
 
         while True:
             self.CellToWall(Cell.FloorFilled)
-            while self.map[x,y] != Cell.Floor:
+            while self.map[x][y] != Cell.Floor:
                 x = self.rand.Next(1,self.width-1)
                 y = self.rand.Next(1,self.height-1)
                 if attempt > self.width*self.height:
@@ -197,16 +195,16 @@ class Level:
                 attempt += 1
 
             filledFloor += self.floodFill(Cell.Floor, Cell.FloorFilled, x, y)
-            if not (filledFloor < int(self).floorCell * 0.5):
+            if not (filledFloor < int(self.floorCell) * 0.5):
                 break
 
         for i in range(1, self.width):
             for j in range(1, self.height):
-                if self.map[i,j] == Cell.Floor:
-                    self.map[i,j] = Cell.Wall
+                if self.map[i][j] == Cell.Floor:
+                    self.map[i][j] = Cell.Wall
 
-                elif self.map[i,j] == Cell.FloorFilled:
-                    self.map[i,j] = Cell.Floor
+                elif self.map[i][j] == Cell.FloorFilled:
+                    self.map[i][j] = Cell.Floor
 
 
         return True
@@ -214,8 +212,8 @@ class Level:
     def CellToWall(self, type):
         for x in range(1, self.width):
             for y in range(1, self.height):
-                if self.map[x,y] == type:
-                    self.map[x,y] = Cell.Wall
+                if self.map[x][y] == type:
+                    self.map[x][y] = Cell.Wall
 
 
 
@@ -224,11 +222,11 @@ class Level:
         if target == replace:
             return 0; 
 
-        elif self.map[x,y] != target:
+        elif self.map[x][y] != target:
             return 0; 
 
         else:
-            self.map[x,y] = replace
+            self.map[x][y] = replace
             filledFloor += 1
 
         if x+1 < self.width-1:
@@ -248,14 +246,14 @@ class Level:
     def cleanDeadCell(self):
         for x in range(1, self.width - 1):
             for y in range(1, self.height -1):
-                if self.map[x,y] == Cell.Floor:
+                if self.map[x][y] == Cell.Floor:
                     surroundWall = 0
-                    surroundWall += 1 if self.map[x-1,y] == Cell.Wall else 0
-                    surroundWall += 1 if self.map[x+1,y] == Cell.Wall else 0
-                    surroundWall += 1 if self.map[x,y-1] == Cell.Wall else 0
-                    surroundWall += 1 if self.map[x,y+1] == Cell.Wall else 0
+                    surroundWall += 1 if self.map[x-1][y] == Cell.Wall else 0
+                    surroundWall += 1 if self.map[x+1][y] == Cell.Wall else 0
+                    surroundWall += 1 if self.map[x][y-1] == Cell.Wall else 0
+                    surroundWall += 1 if self.map[x][y+1] == Cell.Wall else 0
                     if surroundWall >= 3:
-                        self.map[x,y] = Cell.Wall
+                        self.map[x][y] = Cell.Wall
 
 
 
@@ -265,8 +263,8 @@ class Level:
 
         for i in range(-1, 4):
             if x+i > -1 and x+i < self.width:
-                upperCellMap = self.map[x+i,y-1]
-                lowerCellMap = self.map[x+i,y+3]
+                upperCellMap = self.map[x+i][y-1]
+                lowerCellMap = self.map[x+i][y+3]
                 if upperCellMap != Cell.Null or lowerCellMap != Cell.Null:
                     upperCell = template.GetCell(i+1,0)
                     lowerCell = template.GetCell(i+1,4)
@@ -281,8 +279,8 @@ class Level:
 
         for j in range(0, 4):
             if y+j < self.height:
-                leftCellMap = self.map[x-1,y+j]
-                rigthCellMap = self.map[x+3,y+j]
+                leftCellMap = self.map[x-1][y+j]
+                rigthCellMap = self.map[x+3][y+j]
                 if leftCellMap != Cell.Null or rigthCellMap != Cell.Null:
                     leftCell = template.GetCell(0,j+1)
                     rigthCell = template.GetCell(4,j+1)
@@ -304,7 +302,7 @@ class Level:
                         if cell == Cell.Floor:
                             self.floorCell += 1
 
-                        self.map[x+i,y+j] = cell
+                        self.map[x+i][y+j] = cell
 
 
 
@@ -312,7 +310,7 @@ class Level:
     def print(self):
         for x in range(0, self.width):
             for y in range(0, self.height):
-                match self.map[x,y]:
+                match self.map[x][y]:
                     case Cell.Floor:
                         print(" ", end='')
                     case Cell.Wall:
@@ -331,7 +329,7 @@ class Level:
         ret = ""
         for x in range(0, self.width):
             for y in range(0, self.height):
-                match self.map[x,y]:
+                match self.map[x][y]:
                     case Cell.Floor:
                         ret += " "
                     case Cell.Goal:
