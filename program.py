@@ -1,16 +1,15 @@
-import random
-import math
-import sys﻿
-.IO
-.Text
+# import random
+# import math
+# import sys
+from Level import Level
 
 class Program:
-    def Main(self, string[] args):
+    def Main(self, *args):
         level = Level()
 
         level.generate()
         level.print()
-        Console.WriteLine()
+        print()
 
         level.postProcess()
         level.print()
@@ -28,19 +27,17 @@ class Program:
                 complete = level.postProcess()
 
             path = "./exports/" + i.ToString() + ".txt"; 
-            try
-            {
+            try:
                 # Create the file, overwrite if the file exists.
-                using (fs = File.Create(path)){
+                with open(path, 'w') as fs:
                     info = UTF8Encoding(True).GetBytes(level.ToString())
                     # Add some information to the file.
                     fs.Write(info, 0, info.Length)
-                }
 
                 print("Level " + i.ToString() + " exported.")
-            }
-            catch (Exception ex){
-                print(ex.ToString())
-            }
+            
+            except Exception as ex:
+                print(str(ex))
+            
 
 
