@@ -1,6 +1,7 @@
 import random
 import math
 import sys
+from utils import *
 import Cell
 
 class Level:
@@ -18,7 +19,7 @@ class Level:
         self.height = self.width
 
     def generate(self):
-        self.map = new Cell[self.width,self.height]
+        self.map = [None for j in range(self.width,self.height)]
         self.floorCell = 0
 
         #Wall generation around level
@@ -323,7 +324,7 @@ class Level:
                     case Cell.Player:
                         sys.stdout.write("@")
 
-            Console.WriteLine()
+            print()
 
 
     def ToString(self):
