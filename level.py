@@ -53,11 +53,8 @@ class Level:
 
     def spawnCrates(self, n):
         x = 0
-
         y = 0
-
         surroundWall = 0
-
         attempt = 0
         for i in range(0, n):
             while True:
@@ -85,9 +82,7 @@ class Level:
 
     def spawnPlayer(self):
         x = 0
-
         y = 0
-
         attempt = 0
         while True:
             x = self.rand.Next(1, self.width-1)
@@ -107,9 +102,7 @@ class Level:
 
     def spawnGoals(self, n):
         x = 0
-
         y = 0
-
         attempt = 0
         for i in range(0, n):
             isValidGoal = False
@@ -312,15 +305,15 @@ class Level:
             for y in range(0, self.height):
                 match self.map[x][y]:
                     case Cell.Floor:
-                        print(" ", end='')
+                        print("⬛", end='')
                     case Cell.Wall:
-                        print("#", end='')
+                        print("🧱", end='')
                     case Cell.Crate:
-                        print("$", end='')
+                        print("📦", end='')
                     case Cell.Goal:
-                        print(".", end='')
+                        print("🟩", end='')
                     case Cell.Player:
-                        print("@", end='')
+                        print("👤", end='')
 
             print()
 

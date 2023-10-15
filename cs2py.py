@@ -105,7 +105,7 @@ class CSharpToPython(Translator):
                 lines.append(f"{start}{indent}{varName} = {value}")
 
             # print('\n'.join(lines))
-            return '\n'.join(lines)
+            return ''.join(lines)
         
         # src = re.sub(pat, rep, src, 10, re.MULTILINE)
         replaceCount = 0
