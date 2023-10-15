@@ -276,10 +276,10 @@ class CSharpToPython(Translator):
         # \n
        (r"(?P<indent>[ ]*)(?P<line>[\S \t]*);[^\r\n]*#", r"\g<indent>\g<line> #",None, 0),
  
-        # int i = 0;
+        #? int i = 0;
         # i = 0;
-       (r"(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]\.]+)[ ]+(?P<varName>[\w\.]+)[ ]*=[^=]", 
-        r'\g<blockIndent>\g<varName> =',None, 0),
+       (r"(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]\.]+)[ ]+(?P<varName>[\w\.]+)[ ]*=[ ]+(?P<right>[\w]+)", 
+        r'\g<blockIndent>\g<varName> = \g<right>',None, 0),
 
         # int[] i = {1, 2, 3};
         # i = [1, 2, 3];
