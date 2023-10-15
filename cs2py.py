@@ -135,9 +135,6 @@ class CSharpToPython(Translator):
         # ||
         # or
         (r"\|\|", r"or", None, 0),
-        # a.length
-        # len(a)
-        (r"([a-zA-Z0-9_]+)[ ]*\.[ ]*length", r"len(\1)", None, 0),
         # &&
         # and
         (r"&&", r"and", None, 0),
@@ -375,6 +372,10 @@ class CSharpToPython(Translator):
         # \n
        (r"(?P<indent>[ ]*)(?P<line>[\S \t]*);[^\r\n]*#", r"\g<indent>\g<line> #",None, 0),
  
+        # a.length
+        # len(a)
+        (r"([a-zA-Z0-9_\[\]\.]+)[ ]*\.[ ]*[lL]ength", r"len(\1)", None, 0),
+
     ]
 
     LAST_RULES = [
