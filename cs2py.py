@@ -272,7 +272,7 @@ class CSharpToPython(Translator):
          r'\g<start>\g<blockIndent>def \g<methodName>(self, \g<args>):\n\g<blockIndent>    pass', None, 0),
 
         #? public void method(){ }
-        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<severity>(?:public |private |protected |published |override |overload )+)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)[ ]*\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
+        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<severity>(?:public |private |protected |published |override |overload |static )+)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)[ ]*\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
          r'\g<start>\g<blockIndent>def \g<methodName>(self, \g<args>):\n\g<body>', None, 70),
 
         #? public ClassName(){ }

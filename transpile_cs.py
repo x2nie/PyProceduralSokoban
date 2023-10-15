@@ -3,7 +3,8 @@ import cs2py
 import re
 import math
 
-src = 'Level.cs'
+src = 'Program.cs'
+# src = 'Level.cs'
 # src = 'Template.cs'
 with open(src, 'r') as f:
     sourceText = f.read()
