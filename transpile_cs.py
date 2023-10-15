@@ -4,9 +4,9 @@ import re
 import math
 
 # src = 'Program.cs'
-src = 'Level.cs'
+# src = 'Level.cs'
 # src = 'Template.cs'
-# src = 'Templates.cs'
+src = 'Templates.cs'
 with open(src, 'r') as f:
     sourceText = f.read()
 # print(sourceText)

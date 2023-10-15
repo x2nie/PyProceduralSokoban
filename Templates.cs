@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Template;
+import Cell
 
 public static class Templates {
     private static Cell[][] template1 = new Cell[][] {

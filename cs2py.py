@@ -275,6 +275,20 @@ class CSharpToPython(Translator):
         (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<severity>(?:public |private |protected |published |override |overload |static )+)(?P<returnType>\w+)[ ]+(?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)[ ]*\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
          r'\g<start>\g<blockIndent>def \g<methodName>(self, \g<args>):\n\g<body>', None, 70),
 
+
+        #? private static Cell[][] template1 = new Cell[][]{ }
+        #*  @staticmethod
+        #*  def template1():
+        (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)(?P<severity>(?:public |private |protected |published |override |overload )+)static (?P<returnType>[\w]+[\w\<\>\[\]]+)[ ]+(?P<methodName>\w+)[ ]*(?P<args>[^{]*)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
+         r'\g<start>\g<blockIndent>@staticmethod\n\g<blockIndent>def \g<methodName>():\n\g<blockIndent>    return [\n\g<body>\n\g<blockIndent>    ]', None, 70),
+
+        #? new Cell [] {Cell.Null, ..},
+        #* new Cell [] {Cell.Null, ..},
+        (r"(?P<blockIndent>[ ]+)new (?P<returnType>[^\{]+)\{(?P<valueArray>[^\}]+)\}", 
+         r"\g<blockIndent>[\g<valueArray>]", None, 0),
+
+
+
         #? public ClassName(){ }
         #* def __init__( )
         (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)public (?P<methodName>\w+)[ ]*\((?P<args>[\S ]*)\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
@@ -384,8 +398,9 @@ class CSharpToPython(Translator):
 
         (r"Console\.WriteLine\(", r"print(", None, 0),
         (r"Console\.Write\((?P<args>[^\)]+)\)", r"print(\g<args>, end='')", None, 0),
-        (r"using[ ]+\w+", r"", None, 0),
-        (r"\A", r"import random\nimport math\nimport sys\nfrom utils import *", None, 0),
+        (r"using[ ]+[^\n\r]+", r"", None, 0),
+        # (r"\A", r"import random\nimport math\nimport sys\nfrom utils import *", None, 0),
+        (r"\A", r"from utils import *", None, 0),
         (r"([a-zA-Z0-9_]+)\.contains\(([\S ]+)\)", r"\2 in \1", None, 0),
         (r"([a-zA-Z0-9_]+)\.equals\(([\S ]+)\)", r"\1 == \2", None, 0),
         # math module:
