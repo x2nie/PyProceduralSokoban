@@ -260,8 +260,11 @@ class CSharpToPython(Translator):
         # }
         # class IInterface:
         #     ....
-        (r"(?P<blockIndent>[ ]*)interface[ ]*(?P<interfaceName>[a-zA-Z0-9_]+)[ ]*{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", r'\g<blockIndent>class \g<interfaceName>:\n\g<body>', None, 70),
-        (r"(?P<blockIndent>[ ]*)(?:public\s)?class[ ]*(?P<interfaceName>[a-zA-Z0-9_]+)[ ]*{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", 
+        (r"(?P<blockIndent>[ ]*)interface[ ]*(?P<interfaceName>[a-zA-Z0-9_]+)[ ]*{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", 
+         r'\g<blockIndent>class \g<interfaceName>:\n\g<body>', None, 70),
+
+        
+        (r"(?P<blockIndent>[ ]*)(?P<severity>(?:public |private |protected |published |override |overload |static )+)?class[ ]*(?P<interfaceName>[a-zA-Z0-9_]+)[ ]*{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}", 
          r'\g<blockIndent>class \g<interfaceName>:\n\g<body>', None, 70),
 
         #? interface method
@@ -285,7 +288,7 @@ class CSharpToPython(Translator):
          r"\g<blockIndent>\g<methodName> = None", None, 0),
 
         #? cleanup
-        (r", [\w]+ (?P<parameterName>[\w]+)", r", \g<parameterName>", None, 0),
+        (r", [\w\]\[]+ (?P<parameterName>[\w]+)", r", \g<parameterName>", None, 0),
         (r"\(self, \):", r"(self):", None, 0),
 
         # garbage delete
@@ -295,19 +298,6 @@ class CSharpToPython(Translator):
          r"\g<blockIndent>\g<blockName> \g<other>:\n\g<blockIndent>    pass", None, 0),
 
 
-        # ;\n
-        # \n
-       (r"(?P<indent>[ ]*)(?P<line>[\S \t]*);\n", r"\g<indent>\g<line>\n",None, 0),
-
-        # ;
-        # \n
-    #    (r"(?P<indent>[ ]*)(?P<line>[\S\t]*);[^\r\n]*;", 
-    #     r"\g<indent>\g<line>\n\g<indent>",None, 0),
-
-        # ;
-        # \n
-       (r"(?P<indent>[ ]*)(?P<line>[\S \t]*);[^\r\n]*#", r"\g<indent>\g<line> #",None, 0),
- 
         #? int i = 0;
         # i = 0;
        (r"(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]\.]+)[ ]+(?P<varName>[\w\.]+)[ ]*=[ ]+(?P<right>[\w\'\"]+)", 
@@ -336,6 +326,24 @@ class CSharpToPython(Translator):
         (r"(?P<float>\d+\.\d)f", 
          r"\1",None, 0),
 
+        #? range(0, abc[]/2)  | range(0, r.Next(5));
+        #* range(abc)
+        # (r"\((?P<varType>[a-zA-Z0-9_]+)\)(?P<varName>[a-zA-Z0-9_]+)", 
+        #  r"\g<varType>(\g<varName>)",None, 0),
+
+
+
+        #? new Cell[rows.length][]
+        #* [[] for j in range(rows)]
+        (r"new (?P<varName>[a-zA-Z0-9_]+)\[(?P<rows>[^\]]+)\]\[\]", 
+         r"[[] for j in range(\g<rows>)]",None, 0),
+
+        #? new Cell[content[x].Length];
+        #* [[] for j in range(rows)]
+        #? ((?P<condition>.+?(?=\)\{))\)\{[\r\n]+(?P<body>(?P<ind
+        (r"new (?P<varName>[a-zA-Z0-9_]+)\[(?P<rows>.+?(?=\];))\];", 
+         r"[None for j in range(\g<rows>)]",None, 0),
+
         #? new Cell[rows,cols]
         #* [[0 for i in range(cols)] for j in range(rows)]
         (r"new (?P<varName>[a-zA-Z0-9_]+)\[(?P<rows>[a-zA-Z0-9_]+),(?P<cols>[a-zA-Z0-9_]+)\]", 
@@ -354,6 +362,19 @@ class CSharpToPython(Translator):
         # (r"(\S)[ ]*(==|!=|<=|<|>|>=|=)[ ]*(\S)", r"\1 \2 \3", None, 0),
         # (r"not \(([\S ]+)(?!and|or)([\S ]+)\)", r"not \1\2", None, 0),
 
+        # ;\n
+        # \n
+       (r"(?P<indent>[ ]*)(?P<line>[\S \t]*);\n", r"\g<indent>\g<line>\n",None, 0),
+
+        # ;
+        # \n
+    #    (r"(?P<indent>[ ]*)(?P<line>[\S\t]*);[^\r\n]*;", 
+    #     r"\g<indent>\g<line>\n\g<indent>",None, 0),
+
+        # ;
+        # \n
+       (r"(?P<indent>[ ]*)(?P<line>[\S \t]*);[^\r\n]*#", r"\g<indent>\g<line> #",None, 0),
+ 
     ]
 
     LAST_RULES = [
