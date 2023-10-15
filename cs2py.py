@@ -175,6 +175,14 @@ class CSharpToPython(Translator):
 
 
 
+        #? (statement) ? val : alt;
+        #* val if (statement) else alt:
+        (r"\((?P<statement>[^\)]+)\)[ ]*\?[ ]*(?P<val>[^:]+):[ ]*(?P<alt>[^;]*);",  
+         r'\g<val>if \g<statement> else \g<alt>', None, 0),
+
+
+
+
         #? switch (map[x,y]) { 
         # match map[x,y]
         (r"(?P<start>[\r\n]+)(?P<blockIndent>[ ]*)switch[ ]*\((?P<args>[^\)]*)\)\{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)\}",  
