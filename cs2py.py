@@ -205,7 +205,7 @@ class CSharpToPython(Translator):
         # while ...:
         #     ....
         (r"(?P<blockIndent>[ ]*)do\s*{[\r\n]+(?P<body>(?P<indent>[ ]*)[^\r\n]+[\r\n]+((?P=indent)[^\r\n]+[\r\n]+)*)(?P=blockIndent)}[ ]*while[ ]*\((?P<condition>[\S ]*)\)", 
-         r'\g<blockIndent>while True:\n\g<body>\g<blockIndent>    if not \g<condition>:break', None, 70),
+         r'\g<blockIndent>while True:\n\g<body>\g<blockIndent>    if not (\g<condition>):\n\g<blockIndent>        break', None, 70),
 
         #? while (...){
         #     ....
@@ -270,7 +270,7 @@ class CSharpToPython(Translator):
  
         # int i = 0;
         # i = 0;
-       (r"(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]]+)[ ]+(?P<varName>[\w]+)[ ]*=[^=]", 
+       (r"(?P<blockIndent>[ ]*)(?P<varType>[\w\[\]\.]+)[ ]+(?P<varName>[\w\.]+)[ ]*=[^=]", 
         r'\g<blockIndent>\g<varName> =',None, 0),
 
         # int[] i = {1, 2, 3};
@@ -312,7 +312,7 @@ class CSharpToPython(Translator):
         # b == a
         # (r"(\S)(==|!=|<=|<|>|>=|=)(\S)", r"\1 \2 \3", None, 0),
         # (r"(\S)[ ]*(==|!=|<=|<|>|>=|=)[ ]*(\S)", r"\1 \2 \3", None, 0),
-        (r"not \(([\S ]+)(?!and|or)([\S ]+)\)", r"not \1\2", None, 0),
+        # (r"not \(([\S ]+)(?!and|or)([\S ]+)\)", r"not \1\2", None, 0),
 
     ]
 
@@ -341,6 +341,6 @@ class CSharpToPython(Translator):
         (r"Math\.S(?P<name>[a-z]+)", r"math.s\g<name>", None, 0),
         (r"Math\.T(?P<name>[a-z]+)", r"math.t\g<name>", None, 0),
         # random module:
-        (r"new[ ]+Random\(\)\.Next\((?P<first>\d+)[ ]*,[ ]*(?P<second>\d+)\)", r"random.randint(\g<first>, \g<second>+1)", None, 0),
-        (r"new[ ]+Random\(\)\.NextDouble\(\)", r"random.uniform(0, 1)", None, 0)
+        # (r"new[ ]+Random\(\)\.Next\((?P<first>\d+)[ ]*,[ ]*(?P<second>\d+)\)", r"random.randint(\g<first>, \g<second>+1)", None, 0),
+        # (r"new[ ]+Random\(\)\.NextDouble\(\)", r"random.uniform(0, 1)", None, 0)
     ]
